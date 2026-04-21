@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tutorial 6 — Permutations & Combinations | PRP1046</title>
+
+<!-- MathJax for rendering math equations -->
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$','$'], ['\\(','\\)']], displayMath: [['$$','$$'], ['\\[','\\]']] },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+<!-- Google Font for that elegant anime-math feel -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --navy-deep: #0a1428;
+  --navy-mid: #142850;
+  --navy-light: #1e3a6f;
+  --gold: #d4af37;
+  --gold-soft: #e8c862;
+  --gold-glow: rgba(212, 175, 55, 0.3);
+  --cream: #f5e9c9;
+  --text: #e8e4d8;
+  --text-dim: #b8b3a3;
+  --accent-teal: #4ecdc4;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  background: var(--navy-deep);
+  color: var(--text);
+}
+
+/* ========== ANIMATED BACKGROUND ========== */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(212, 175, 55, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(78, 205, 196, 0.06) 0%, transparent 50%),
+    linear-gradient(135deg, var(--navy-deep) 0%, var(--navy-mid) 50%, var(--navy-deep) 100%);
+  z-index: -2;
+}
+
+.math-decor {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
+}
+.math-decor span {
+  position: absolute;
+  color: var(--gold);
+  opacity: 0.06;
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  user-select: none;
+  animation: float 20s infinite ease-in-out;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-20px) rotate(5deg); }
+}
+
+.app {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========== HEADER ========== */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2.5rem;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+  background: rgba(10, 20, 40, 0.6);
+  backdrop-filter: blur(8px);
+}
+.brand {
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.15em;
+  color: var(--gold);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.brand-sub {
+  color: var(--text-dim);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+}
+.progress-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.progress-text {
+  color: var(--gold-soft);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+}
+.progress-bar {
+  width: 200px;
+  height: 4px;
+  background: rgba(212, 175, 55, 0.15);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--gold-soft));
+  transition: width 0.4s ease;
+  box-shadow: 0 0 8px var(--gold-glow);
+}
+
+/* ========== SLIDE AREA ========== */
+.slide-area {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 4rem;
+  overflow-y: auto;
+}
+
+.slide {
+  display: none;
+  width: 100%;
+  max-width: 1000px;
+  animation: slideIn 0.5s ease;
+}
+.slide.active { display: block; }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========== TITLE SLIDE ========== */
+.title-slide {
+  text-align: center;
+  padding: 2rem 0;
+}
+.title-ornament {
+  color: var(--gold);
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  letter-spacing: 1rem;
+}
+.title-eyebrow {
+  font-family: 'Cinzel', serif;
+  color: var(--gold-soft);
+  letter-spacing: 0.4em;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+.title-main {
+  font-family: 'Cinzel', serif;
+  font-size: 3.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--cream) 50%, var(--gold) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+}
+.title-sub {
+  font-size: 1.5rem;
+  color: var(--text-dim);
+  font-style: italic;
+  margin-bottom: 2rem;
+}
+.title-meta {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+.meta-item {
+  text-align: center;
+}
+.meta-label {
+  color: var(--gold-soft);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-family: 'Cinzel', serif;
+}
+.meta-value {
+  color: var(--text);
+  font-size: 1.1rem;
+  margin-top: 0.3rem;
+}
+
+/* ========== QUESTION SLIDE ========== */
+.q-header {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+  padding-bottom: 1rem;
+}
+.q-number {
+  font-family: 'Cinzel', serif;
+  color: var(--gold);
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+.q-tag {
+  background: rgba(212, 175, 55, 0.15);
+  color: var(--gold-soft);
+  padding: 0.25rem 0.8rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.15em;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+}
+.q-clo {
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  font-family: 'JetBrains Mono', monospace;
+  margin-left: auto;
+}
+
+.q-body {
+  font-size: 1.4rem;
+  line-height: 1.8;
+  color: var(--text);
+  margin-bottom: 1rem;
+}
+.q-body .highlight {
+  color: var(--gold-soft);
+  font-weight: 600;
+}
+
+/* ========== SOLUTION ========== */
+.solution-card {
+  background: linear-gradient(135deg, rgba(20, 40, 80, 0.6), rgba(30, 58, 111, 0.4));
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 8px;
+  padding: 1.5rem 2rem;
+  position: relative;
+}
+.solution-card::before {
+  content: '✦ SOLUTION ✦';
+  position: absolute;
+  top: -10px;
+  left: 1.5rem;
+  background: var(--navy-deep);
+  color: var(--gold);
+  padding: 0 0.8rem;
+  font-family: 'Cinzel', serif;
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+}
+.sol-step {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+  position: relative;
+  line-height: 1.7;
+  font-size: 1.1rem;
+}
+.sol-step::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--gold);
+  font-size: 1.2rem;
+}
+.sol-step .label {
+  color: var(--gold-soft);
+  font-weight: 600;
+  font-family: 'Cinzel', serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.1em;
+  display: block;
+  margin-bottom: 0.3rem;
+}
+.sol-math {
+  display: block;
+  text-align: center;
+  margin: 0.8rem 0;
+  font-size: 1.2rem;
+  color: var(--cream);
+}
+.sol-final {
+  margin-top: 1.5rem;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(232, 200, 98, 0.08));
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  text-align: center;
+  font-family: 'Cinzel', serif;
+}
+.sol-final-label {
+  color: var(--gold);
+  font-size: 0.75rem;
+  letter-spacing: 0.3em;
+  margin-bottom: 0.4rem;
+}
+.sol-final-value {
+  color: var(--cream);
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+/* ========== NUMBER CARDS (Q6) ========== */
+.cards-row {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: 1.5rem 0;
+  flex-wrap: wrap;
+}
+.card {
+  width: 50px;
+  height: 70px;
+  background: linear-gradient(135deg, var(--navy-light), var(--navy-mid));
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cinzel', serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--gold-soft);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+.card.even { color: var(--accent-teal); border-color: var(--accent-teal); }
+
+/* ========== FOOTER ========== */
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2.5rem;
+  border-top: 1px solid rgba(212, 175, 55, 0.2);
+  background: rgba(10, 20, 40, 0.6);
+  backdrop-filter: blur(8px);
+}
+.nav-btn {
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  padding: 0.6rem 1.5rem;
+  font-family: 'Cinzel', serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.nav-btn:hover:not(:disabled) {
+  background: var(--gold);
+  color: var(--navy-deep);
+}
+.nav-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.slide-dots {
+  display: flex;
+  gap: 0.3rem;
+  max-width: 400px;
+  overflow-x: auto;
+  padding: 0.3rem;
+}
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(212, 175, 55, 0.25);
+  cursor: pointer;
+  transition: all 0.3s;
+  flex-shrink: 0;
+}
+.dot.active {
+  background: var(--gold);
+  box-shadow: 0 0 8px var(--gold-glow);
+  transform: scale(1.4);
+}
+
+.kbd-hint {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  background: rgba(10, 20, 40, 0.8);
+  color: var(--text-dim);
+  padding: 0.5rem 0.8rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-family: 'JetBrains Mono', monospace;
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  opacity: 0.6;
+  pointer-events: none;
+}
+.kbd-hint kbd {
+  background: var(--navy-mid);
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  border: 1px solid var(--gold);
+  color: var(--gold-soft);
+  margin: 0 0.2rem;
+}
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--navy-deep); }
+::-webkit-scrollbar-thumb { background: rgba(212, 175, 55, 0.3); border-radius: 4px; }
+
+@media (max-width: 768px) {
+  .slide-area { padding: 1rem; }
+  .title-main { font-size: 2.2rem; }
+  .q-number { font-size: 1.8rem; }
+  .q-body { font-size: 1.1rem; }
+  .progress-bar { width: 100px; }
+  .kbd-hint { display: none; }
+}
+
+/* ========== PASSWORD PROTECTION ========== */
+#passwordOverlay {
+  position: fixed;
+  inset: 0;
+  background: var(--navy-deep);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease;
+}
+#passwordOverlay.hidden {
+  display: none;
+}
+.password-box {
+  background: linear-gradient(135deg, var(--navy-mid), var(--navy-light));
+  border: 2px solid var(--gold);
+  border-radius: 12px;
+  padding: 3rem 2.5rem;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+.password-title {
+  font-family: 'Cinzel', serif;
+  color: var(--gold);
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.2em;
+}
+.password-subtitle {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  margin-bottom: 2rem;
+}
+#passwordInput {
+  width: 100%;
+  padding: 0.8rem 1.2rem;
+  background: rgba(10, 20, 40, 0.6);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s;
+}
+#passwordInput:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 12px var(--gold-glow);
+}
+#passwordBtn {
+  width: 100%;
+  padding: 0.8rem 1.5rem;
+  background: linear-gradient(135deg, var(--gold), var(--gold-soft));
+  color: var(--navy-deep);
+  border: none;
+  border-radius: 6px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.15em;
+  cursor: pointer;
+  font-weight: 700;
+  transition: all 0.3s;
+}
+#passwordBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px var(--gold-glow);
+}
+.password-error {
+  color: #e74c3c;
+  font-size: 0.85rem;
+  margin-top: 0.8rem;
+  min-height: 20px;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- PASSWORD PROTECTION -->
+<div id="passwordOverlay">
+  <div class="password-box">
+    <div class="password-title">PROTECTED</div>
+    <div class="password-subtitle">Tutorial 6 · PRP1046</div>
+    <input type="password" id="passwordInput" placeholder="Enter password" autocomplete="off">
+    <button id="passwordBtn" onclick="checkPassword()">UNLOCK</button>
+    <div class="password-error" id="passwordError"></div>
+  </div>
+</div>
+
+<div class="math-decor" id="mathDecor"></div>
+
+<div class="app">
+
+  <div class="header">
+    <div>
+      <div class="brand">PRP 1046 · MATHEMATICS II</div>
+      <div class="brand-sub">Learning Unit 6 — Permutations & Combinations</div>
+    </div>
+    <div class="progress-info">
+      <div class="progress-text" id="progressText">01 / 54</div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+  </div>
+
+  <div class="slide-area" id="slideArea">
+
+    <!-- SLIDE 0: TITLE -->
+    <div class="slide active">
+      <div class="title-slide">
+        <div class="title-ornament">✦ ✧ ✦</div>
+        <div class="title-eyebrow">TUTORIAL SIX</div>
+        <h1 class="title-main">Permutations<br>& Combinations</h1>
+        <div class="title-sub">~ The Art of Counting ~</div>
+        <div class="title-meta">
+          <div class="meta-item">
+            <div class="meta-label">Course</div>
+            <div class="meta-value">PRP 1046 Mathematics II</div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-label">Unit</div>
+            <div class="meta-value">Learning Unit 6</div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-label">Questions</div>
+            <div class="meta-value">10 Problems</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q1(a) QUESTION -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.1(a)</div>
+        <div class="q-tag">CLASSIFY</div>
+        <div class="q-clo">CLO 1</div>
+      </div>
+      <div class="q-body">
+        State whether the following is a <span class="highlight">permutation</span> or a <span class="highlight">combination</span> problem:<br><br>
+        A team of 5 members will be selected for an expedition from 4 swimmers and 3 non-swimmers, where swimmers must be more than non-swimmers.
+      </div>
+    </div>
+
+    <!-- Q1(a) ANSWER -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.1(a)</div>
+        <div class="q-tag">SOLUTION</div>
+        <div class="q-clo">CLO 1</div>
+      </div>
+      <div class="solution-card">
+        <div class="sol-step">
+          Kita hanya pilih siapa yang masuk team. Order/susunan tak penting.
+        </div>
+        <div class="sol-final">
+          <div class="sol-final-label">ANSWER</div>
+          <div class="sol-final-value">COMBINATION</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q1(b) QUESTION -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.1(b)</div>
+        <div class="q-tag">CLASSIFY</div>
+        <div class="q-clo">CLO 1</div>
+      </div>
+      <div class="q-body">
+        State whether the following is a <span class="highlight">permutation</span> or a <span class="highlight">combination</span> problem:<br><br>
+        A librarian arranges 3 identical books, 4 identical magazines, and 5 identical journals in a row.
+      </div>
+    </div>
+
+    <!-- Q1(b) ANSWER -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.1(b)</div>
+        <div class="q-tag">SOLUTION</div>
+        <div class="q-clo">CLO 1</div>
+      </div>
+      <div class="solution-card">
+        <div class="sol-step">
+          Keyword: "<strong>arrange in a row</strong>" — susunan penting. Buku kiri/kanan berbeza.
+        </div>
+        <div class="sol-final">
+          <div class="sol-final-label">ANSWER</div>
+          <div class="sol-final-value">PERMUTATION</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q1(c) QUESTION -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.1(c)</div>
+        <div class="q-tag">CLASSIFY</div>
+        <div class="q-clo">CLO 1</div>
+      </div>
+      <div class="q-body">
+        State whether the following is a <span class="highlight">permutation</span> or a <span class="highlight">combination</span> problem:<br><br>
+        A netball team of 7 players is selected from 14 students to play on the field.
+      </div>
+    </div>
+
+    <!-- Q1(c) ANSWER -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.1(c)</div>
+        <div class="q-tag">SOLUTION</div>
+        <div class="q-clo">CLO 1</div>
+      </div>
+      <div class="solution-card">
+        <div class="sol-step">
+          Walaupun guna perkataan "selected", pemain kena ambil <strong>position dalam playing formation</strong>. Order penting!
+        </div>
+        <div class="sol-final">
+          <div class="sol-final-label">ANSWER</div>
+          <div class="sol-final-value">PERMUTATION <em style="font-size:0.8em;color:var(--text-dim)">(implied by field position)</em></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q1(d) QUESTION -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.1(d)</div>
+        <div class="q-tag">CLASSIFY</div>
+        <div class="q-clo">CLO 1</div>
+      </div>
+      <div class="q-body">
+        State whether the following is a <span class="highlight">permutation</span> or a <span class="highlight">combination</span> problem:<br><br>
+        A mathematics test has 10 questions (4 trigonometry, 6 algebra). A candidate answers 8 questions with at least 4 from algebra.
+      </div>
+    </div>
+
+    <!-- Q1(d) ANSWER -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.1(d)</div>
+        <div class="q-tag">SOLUTION</div>
+        <div class="q-clo">CLO 1</div>
+      </div>
+      <div class="solution-card">
+        <div class="sol-step">
+          Pelajar pilih soalan mana untuk dijawab. Order tak penting — cuma pilih sahaja.
+        </div>
+        <div class="sol-final">
+          <div class="sol-final-label">ANSWER</div>
+          <div class="sol-final-value">COMBINATION</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q2(a) QUESTION -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.2(a)</div>
+        <div class="q-tag">PERMUTATION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="q-body">
+        In how many ways can a group of <span class="highlight">7 people</span> be arranged in a row <strong>without any restriction</strong>?
+      </div>
+    </div>
+
+    <!-- Q2(a) ANSWER -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.2(a)</div>
+        <div class="q-tag">SOLUTION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="solution-card">
+        <div class="sol-step">
+          <span class="label">Setup</span>
+          All 7 people taken together → guna $n!$
+        </div>
+        <div class="sol-step">
+          <span class="label">Calculate</span>
+          <span class="sol-math">$7! = 7 \times 6 \times 5 \times 4 \times 3 \times 2 \times 1 = 5040$</span>
+        </div>
+        <div class="sol-final">
+          <div class="sol-final-label">ANSWER</div>
+          <div class="sol-final-value">$5040$ ways</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q2(b) QUESTION -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.2(b)</div>
+        <div class="q-tag">PERMUTATION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="q-body">
+        In how many ways can a group of 7 people be arranged in a row, taking only <span class="highlight">4 people at a time</span>?
+      </div>
+    </div>
+
+    <!-- Q2(b) ANSWER -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.2(b)</div>
+        <div class="q-tag">SOLUTION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="solution-card">
+        <div class="sol-step">
+          <span class="label">Setup</span>
+          Choose 4 from 7, order matters → guna ${}^nP_r$
+        </div>
+        <div class="sol-step">
+          <span class="label">Calculate</span>
+          <span class="sol-math">${}^7P_4 = \dfrac{7!}{(7-4)!} = \dfrac{7!}{3!} = 7 \times 6 \times 5 \times 4 = 840$</span>
+        </div>
+        <div class="sol-final">
+          <div class="sol-final-label">ANSWER</div>
+          <div class="sol-final-value">$840$ ways</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q3(a) QUESTION -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.3(a)</div>
+        <div class="q-tag">COMBINATION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="q-body">
+        A group of 5 people is chosen from a committee of <span class="highlight">7 women and 5 men</span>. Find the number of ways if there is <strong>no restriction</strong>.
+      </div>
+    </div>
+
+    <!-- Q3(a) ANSWER -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.3(a)</div>
+        <div class="q-tag">SOLUTION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="solution-card">
+        <div class="sol-step">
+          <span class="label">Setup</span>
+          Choose 5 from 12 (7W + 5M total)
+        </div>
+        <div class="sol-step">
+          <span class="label">Calculate</span>
+          <span class="sol-math">${}^{12}C_5 = \dfrac{12!}{5! \cdot 7!} = 792$</span>
+        </div>
+        <div class="sol-final">
+          <div class="sol-final-label">ANSWER</div>
+          <div class="sol-final-value">$792$ ways</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q3(b) QUESTION -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.3(b)</div>
+        <div class="q-tag">COMBINATION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="q-body">
+        A group of 5 people is chosen from 7 women and 5 men. Find the number of ways if <span class="highlight">the number of men must be greater than women</span>.
+      </div>
+    </div>
+
+    <!-- Q3(b) ANSWER -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.3(b)</div>
+        <div class="q-tag">SOLUTION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="solution-card">
+        <div class="sol-step">
+          <span class="label">Men &gt; Women untuk 5 orang — 3 cases</span>
+          <strong>Case 1:</strong> 3M + 2W → ${}^5C_3 \times {}^7C_2 = 10 \times 21 = 210$<br>
+          <strong>Case 2:</strong> 4M + 1W → ${}^5C_4 \times {}^7C_1 = 5 \times 7 = 35$<br>
+          <strong>Case 3:</strong> 5M + 0W → ${}^5C_5 = 1$
+        </div>
+        <div class="sol-step">
+          <span class="label">Add all cases (Addition Principle)</span>
+          <span class="sol-math">$210 + 35 + 1 = 246$</span>
+        </div>
+        <div class="sol-final">
+          <div class="sol-final-label">ANSWER</div>
+          <div class="sol-final-value">$246$ ways</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q4(a) QUESTION -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.4(a)</div>
+        <div class="q-tag">PERMUTATION · REPETITION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="q-body">
+        In how many ways can the letters in the word <span class="highlight">'SEPTEMBER'</span> be arranged if there is <strong>no restriction</strong>?
+      </div>
+    </div>
+
+    <!-- Q4(a) ANSWER -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.4(a)</div>
+        <div class="q-tag">SOLUTION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="solution-card">
+        <div class="sol-step">
+          <span class="label">Setup</span>
+          SEPTEMBER = 9 letters, dengan <strong>3 huruf E</strong> berulang
+        </div>
+        <div class="sol-step">
+          <span class="label">Formula: Permutation dengan repetition</span>
+          <span class="sol-math">$\dfrac{9!}{3!} = \dfrac{362880}{6} = 60{,}480$</span>
+        </div>
+        <div class="sol-final">
+          <div class="sol-final-label">ANSWER</div>
+          <div class="sol-final-value">$60{,}480$ ways</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q4(b) QUESTION -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.4(b)</div>
+        <div class="q-tag">PERMUTATION · REPETITION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="q-body">
+        In how many ways can the letters in 'SEPTEMBER' be arranged if <span class="highlight">all letters 'E' must be together</span>?
+      </div>
+    </div>
+
+    <!-- Q4(b) ANSWER -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.4(b)</div>
+        <div class="q-tag">SOLUTION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="solution-card">
+        <div class="sol-step">
+          <span class="label">Block Method</span>
+          Gabungkan 3 E jadi satu blok: [EEE]<br>
+          Sekarang ada 7 objek: S, P, T, M, B, R, [EEE]<br>
+          Dalam blok, EEE adalah identical → 1 way sahaja
+        </div>
+        <div class="sol-step">
+          <span class="label">Calculate</span>
+          <span class="sol-math">$7! \times 1 = 5{,}040$</span>
+        </div>
+        <div class="sol-final">
+          <div class="sol-final-label">ANSWER</div>
+          <div class="sol-final-value">$5{,}040$ ways</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q4(c) QUESTION -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.4(c)</div>
+        <div class="q-tag">PERMUTATION · REPETITION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="q-body">
+        In how many ways can the letters in 'SEPTEMBER' be arranged if <span class="highlight">not all of the letters 'E' must be together</span>?
+      </div>
+    </div>
+
+    <!-- Q4(c) ANSWER -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.4(c)</div>
+        <div class="q-tag">SOLUTION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="solution-card">
+        <div class="sol-step">
+          <span class="label">Complement Method</span>
+          Not all together = No restriction − All together
+        </div>
+        <div class="sol-step">
+          <span class="label">Calculate</span>
+          <span class="sol-math">$60{,}480 - 5{,}040 = 55{,}440$</span>
+        </div>
+        <div class="sol-final">
+          <div class="sol-final-label">ANSWER</div>
+          <div class="sol-final-value">$55{,}440$ ways</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q5(a) QUESTION -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.5(a)</div>
+        <div class="q-tag">CONDITIONAL PERMUTATION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="q-body">
+        A chamber choir has 9 singers (3 sopranos, 3 altos, 2 tenors, 1 bass). Sopranos & altos = female; tenors & bass = male. Arrange them in a line with <strong>no restriction</strong>.
+      </div>
+    </div>
+
+    <!-- Q5(a) ANSWER -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.5(a)</div>
+        <div class="q-tag">SOLUTION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="solution-card">
+        <div class="sol-step">
+          <span class="label">Setup</span>
+          Just 9 distinct people in a row
+        </div>
+        <div class="sol-step">
+          <span class="label">Calculate</span>
+          <span class="sol-math">$9! = 362{,}880$</span>
+        </div>
+        <div class="sol-final">
+          <div class="sol-final-label">ANSWER</div>
+          <div class="sol-final-value">$362{,}880$ ways</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q5(b) QUESTION -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.5(b)</div>
+        <div class="q-tag">CONDITIONAL PERMUTATION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="q-body">
+        9 singers (6 female, 3 male). Arrange them in a line if <span class="highlight">all female singers must be together</span>.
+      </div>
+    </div>
+
+    <!-- Q5(b) ANSWER -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.5(b)</div>
+        <div class="q-tag">SOLUTION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="solution-card">
+        <div class="sol-step">
+          <span class="label">Block Method</span>
+          6 females jadi 1 blok + 3 males = 4 objek<br>
+          • Susun 4 objek: $4! = 24$<br>
+          • Susun 6 females dalam blok: $6! = 720$
+        </div>
+        <div class="sol-step">
+          <span class="label">Multiply (Multiplication Principle)</span>
+          <span class="sol-math">$4! \times 6! = 24 \times 720 = 17{,}280$</span>
+        </div>
+        <div class="sol-final">
+          <div class="sol-final-label">ANSWER</div>
+          <div class="sol-final-value">$17{,}280$ ways</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q5(c) QUESTION -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.5(c)</div>
+        <div class="q-tag">CONDITIONAL PERMUTATION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="q-body">
+        9 singers (6 female, 3 male). Arrange them in a line if <span class="highlight">all males on the LEFT and all females on the RIGHT</span>.
+      </div>
+    </div>
+
+    <!-- Q5(c) ANSWER -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.5(c)</div>
+        <div class="q-tag">SOLUTION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="solution-card">
+        <div class="sol-step">
+          <span class="label">Setup — separate zones</span>
+          Males KIRI, Females KANAN (tetap)<br>
+          • Susun 3 males: $3! = 6$<br>
+          • Susun 6 females: $6! = 720$
+        </div>
+        <div class="sol-step">
+          <span class="label">Multiply</span>
+          <span class="sol-math">$3! \times 6! = 6 \times 720 = 4{,}320$</span>
+        </div>
+        <div class="sol-final">
+          <div class="sol-final-label">ANSWER</div>
+          <div class="sol-final-value">$4{,}320$ ways</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q6(a) QUESTION -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.6(a)</div>
+        <div class="q-tag">CARDS · COMBINATION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="q-body">
+        Given 12 number cards:
+      </div>
+      <div class="cards-row">
+        <div class="card">1</div><div class="card even">2</div><div class="card">3</div>
+        <div class="card even">4</div><div class="card">5</div><div class="card even">6</div>
+        <div class="card">7</div><div class="card even">8</div><div class="card">9</div>
+        <div class="card even">10</div><div class="card">11</div><div class="card even">12</div>
+      </div>
+      <div class="q-body">
+        <span class="highlight">Select 7 cards</span>: 4 even + 3 odd.
+      </div>
+    </div>
+
+    <!-- Q6(a) ANSWER -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.6(a)</div>
+        <div class="q-tag">SOLUTION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="solution-card">
+        <div class="sol-step">
+          <span class="label">Setup</span>
+          6 even (2,4,6,8,10,12) dan 6 odd (1,3,5,7,9,11)<br>
+          "Select" → order tak penting → guna C
+        </div>
+        <div class="sol-step">
+          <span class="label">Calculate</span>
+          • Choose 4 even: ${}^6C_4 = 15$<br>
+          • Choose 3 odd: ${}^6C_3 = 20$
+          <span class="sol-math">${}^6C_4 \times {}^6C_3 = 15 \times 20 = 300$</span>
+        </div>
+        <div class="sol-final">
+          <div class="sol-final-label">ANSWER</div>
+          <div class="sol-final-value">$300$ ways</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q6(b) QUESTION -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.6(b)</div>
+        <div class="q-tag">CARDS · PERMUTATION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="q-body">
+        Given 12 number cards (6 even, 6 odd). <span class="highlight">Arrange 9 cards in a row</span>: first 5 are even, last 4 are odd.
+      </div>
+    </div>
+
+    <!-- Q6(b) ANSWER -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.6(b)</div>
+        <div class="q-tag">SOLUTION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="solution-card">
+        <div class="sol-step">
+          <span class="label">Setup</span>
+          "Arrange in a row" → order penting → guna P
+        </div>
+        <div class="sol-step">
+          <span class="label">Calculate</span>
+          • Arrange 5 even from 6: ${}^6P_5 = 720$<br>
+          • Arrange 4 odd from 6: ${}^6P_4 = 360$
+          <span class="sol-math">${}^6P_5 \times {}^6P_4 = 720 \times 360 = 259{,}200$</span>
+        </div>
+        <div class="sol-final">
+          <div class="sol-final-label">ANSWER</div>
+          <div class="sol-final-value">$259{,}200$ ways</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q7(a) QUESTION -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.7(a)</div>
+        <div class="q-tag">COMBINATION · COUPLES</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="q-body">
+        Choose a committee of 3 members from <span class="highlight">5 married couples</span> (10 people). Find the number of committees if <strong>all members are men</strong>.
+      </div>
+    </div>
+
+    <!-- Q7(a) ANSWER -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.7(a)</div>
+        <div class="q-tag">SOLUTION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="solution-card">
+        <div class="sol-step">
+          <span class="label">Setup</span>
+          Choose 3 men from 5 men
+        </div>
+        <div class="sol-step">
+          <span class="label">Calculate</span>
+          <span class="sol-math">${}^5C_3 = 10$</span>
+        </div>
+        <div class="sol-final">
+          <div class="sol-final-label">ANSWER</div>
+          <div class="sol-final-value">$10$ committees</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q7(b) QUESTION -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.7(b)</div>
+        <div class="q-tag">COMBINATION · COUPLES</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="q-body">
+        Choose 3 members from 5 married couples. Find the number of committees if <span class="highlight">no husband and wife can be in the same committee</span>.
+      </div>
+    </div>
+
+    <!-- Q7(b) ANSWER -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.7(b)</div>
+        <div class="q-tag">SOLUTION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="solution-card">
+        <div class="sol-step">
+          <span class="label">Complement Method</span>
+          No couple = Total − (At least 1 couple)<br><br>
+          • Total: ${}^{10}C_3 = 120$<br>
+          • With 1 couple: ${}^5C_1 \times {}^8C_1 = 5 \times 8 = 40$
+        </div>
+        <div class="sol-step">
+          <span class="label">Calculate</span>
+          <span class="sol-math">$120 - 40 = 80$</span>
+        </div>
+        <div class="sol-final">
+          <div class="sol-final-label">ANSWER</div>
+          <div class="sol-final-value">$80$ committees</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q8(a) QUESTION -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.8(a)</div>
+        <div class="q-tag">PERMUTATION · WORD</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="q-body">
+        Arrange all letters of <span class="highlight">'PETALINGJAYA'</span> such that <strong>the first letter is P and the last letter is A</strong>.
+      </div>
+    </div>
+
+    <!-- Q8(a) ANSWER -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.8(a)</div>
+        <div class="q-tag">SOLUTION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="solution-card">
+        <div class="sol-step">
+          <span class="label">Setup</span>
+          PETALINGJAYA = 12 letters dengan <strong>3 huruf A</strong><br>
+          Fix P di awal (1 way), A di akhir (1 way)<br>
+          Baki 10 letters (E,T,A,L,I,N,G,J,A,Y) dengan <strong>2 A</strong>
+        </div>
+        <div class="sol-step">
+          <span class="label">Calculate</span>
+          <span class="sol-math">$1 \times \dfrac{10!}{2!} \times 1 = 1{,}814{,}400$</span>
+        </div>
+        <div class="sol-final">
+          <div class="sol-final-label">ANSWER</div>
+          <div class="sol-final-value">$1{,}814{,}400$ ways</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q8(b) QUESTION -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.8(b)</div>
+        <div class="q-tag">PERMUTATION · WORD</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="q-body">
+        Arrange all letters of 'PETALINGJAYA' such that <span class="highlight">all letters A must be together</span>.
+      </div>
+    </div>
+
+    <!-- Q8(b) ANSWER -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.8(b)</div>
+        <div class="q-tag">SOLUTION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="solution-card">
+        <div class="sol-step">
+          <span class="label">Block Method</span>
+          Treat 3 A as 1 block: [AAA]<br>
+          Now: P,E,T,L,I,N,G,J,Y,[AAA] = 10 objek (semua distinct)
+        </div>
+        <div class="sol-step">
+          <span class="label">Calculate</span>
+          <span class="sol-math">$10! = 3{,}628{,}800$</span>
+        </div>
+        <div class="sol-final">
+          <div class="sol-final-label">ANSWER</div>
+          <div class="sol-final-value">$3{,}628{,}800$ ways</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q8(c) QUESTION -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.8(c)</div>
+        <div class="q-tag">PERMUTATION · WORD</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="q-body">
+        Arrange 'PETALINGJAYA' such that <span class="highlight">first letter is a consonant and last letter is a vowel</span>.
+      </div>
+    </div>
+
+    <!-- Q8(c) ANSWER -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.8(c)</div>
+        <div class="q-tag">SOLUTION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="solution-card">
+        <div class="sol-step">
+          <span class="label">Setup — case analysis</span>
+          7 consonants, 5 vowels (E,A,A,A,I)
+        </div>
+        <div class="sol-step">
+          <strong>Case 1: last = A</strong> (guna 1 dari 3 A)<br>
+          7 consonants first, baki 10 letters dengan 2 A<br>
+          $7 \times \dfrac{10!}{2!} \times 1 = 12{,}700{,}800$
+        </div>
+        <div class="sol-step">
+          <strong>Case 2: last = E or I</strong><br>
+          7 consonants first, baki 10 letters dengan 3 A<br>
+          $7 \times \dfrac{10!}{3!} \times 2 = 8{,}467{,}200$
+        </div>
+        <div class="sol-step">
+          <span class="label">Total</span>
+          <span class="sol-math">$12{,}700{,}800 + 8{,}467{,}200 = 21{,}168{,}000$</span>
+        </div>
+        <div class="sol-final">
+          <div class="sol-final-label">ANSWER</div>
+          <div class="sol-final-value">$21{,}168{,}000$ ways</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q9(a) QUESTION -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.9(a)</div>
+        <div class="q-tag">DIGITS · CONDITIONS</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="q-body">
+        Form 5-digit numbers from <span class="highlight">{2,3,4,5,6,7,8,9}</span> without repetition. How many <strong>5-digit numbers between 40,000 and 70,000</strong>?
+      </div>
+    </div>
+
+    <!-- Q9(a) ANSWER -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.9(a)</div>
+        <div class="q-tag">SOLUTION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="solution-card">
+        <div class="sol-step">
+          <span class="label">Setup</span>
+          First digit ∈ {4, 5, 6} → 3 choices<br>
+          Baki 4 digits dari 7 yang tinggal
+        </div>
+        <div class="sol-step">
+          <span class="label">Calculate</span>
+          <span class="sol-math">$3 \times {}^7P_4 = 3 \times 840 = 2{,}520$</span>
+        </div>
+        <div class="sol-final">
+          <div class="sol-final-label">ANSWER</div>
+          <div class="sol-final-value">$2{,}520$ numbers</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q9(b) QUESTION -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.9(b)</div>
+        <div class="q-tag">DIGITS · CONDITIONS</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="q-body">
+        Form 5-digit numbers from {2,3,4,5,6,7,8,9} without repetition. How many <span class="highlight">5-digit ODD numbers greater than 70,000</span>?
+      </div>
+    </div>
+
+    <!-- Q9(b) ANSWER -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.9(b)</div>
+        <div class="q-tag">SOLUTION</div>
+        <div class="q-clo">CLO 2</div>
+      </div>
+      <div class="solution-card">
+        <div class="sol-step">
+          <span class="label">Case 1: starts with 7</span>
+          Last ∈ {3,5,9} (3 choices, 7 used)<br>
+          $1 \times {}^6P_3 \times 3 = 120 \times 3 = 360$
+        </div>
+        <div class="sol-step">
+          <span class="label">Case 2: starts with 8</span>
+          Last ∈ {3,5,7,9} (4 choices)<br>
+          $1 \times {}^6P_3 \times 4 = 120 \times 4 = 480$
+        </div>
+        <div class="sol-step">
+          <span class="label">Case 3: starts with 9</span>
+          Last ∈ {3,5,7} (3 choices, 9 used)<br>
+          $1 \times {}^6P_3 \times 3 = 120 \times 3 = 360$
+        </div>
+        <div class="sol-step">
+          <span class="label">Total</span>
+          <span class="sol-math">$360 + 480 + 360 = 1{,}200$</span>
+        </div>
+        <div class="sol-final">
+          <div class="sol-final-label">ANSWER</div>
+          <div class="sol-final-value">$1{,}200$ numbers</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q10(a) QUESTION -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.10(a)</div>
+        <div class="q-tag">PAST YEAR EXAM</div>
+        <div class="q-clo">CLO 2 · 2 marks</div>
+      </div>
+      <div class="q-body">
+        In an English Test, a student selects <span class="highlight">6 out of 10 questions</span> to answer. How many ways if there is <strong>no restriction</strong>?
+      </div>
+    </div>
+
+    <!-- Q10(a) ANSWER -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.10(a)</div>
+        <div class="q-tag">SOLUTION</div>
+        <div class="q-clo">CLO 2 · 2 marks</div>
+      </div>
+      <div class="solution-card">
+        <div class="sol-step">
+          <span class="label">Setup</span>
+          Choose 6 from 10
+        </div>
+        <div class="sol-step">
+          <span class="label">Calculate</span>
+          <span class="sol-math">${}^{10}C_6 = \dfrac{10!}{4! \cdot 6!} = 210$</span>
+          <em style="color:var(--gold-soft);font-size:0.85rem">Marking: 1M selection · 1M answer</em>
+        </div>
+        <div class="sol-final">
+          <div class="sol-final-label">ANSWER</div>
+          <div class="sol-final-value">$210$ ways</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q10(b) QUESTION -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.10(b)</div>
+        <div class="q-tag">PAST YEAR EXAM</div>
+        <div class="q-clo">CLO 2 · 3 marks</div>
+      </div>
+      <div class="q-body">
+        Select 6 out of 10 questions. How many ways if <span class="highlight">he must answer the first 2 questions</span>?
+      </div>
+    </div>
+
+    <!-- Q10(b) ANSWER -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.10(b)</div>
+        <div class="q-tag">SOLUTION</div>
+        <div class="q-clo">CLO 2 · 3 marks</div>
+      </div>
+      <div class="solution-card">
+        <div class="sol-step">
+          <span class="label">Setup</span>
+          First 2 = compulsory → ${}^2C_2 = 1$<br>
+          Choose 4 more from 8 baki
+        </div>
+        <div class="sol-step">
+          <span class="label">Calculate</span>
+          <span class="sol-math">${}^2C_2 \times {}^8C_4 = 1 \times 70 = 70$</span>
+          <em style="color:var(--gold-soft);font-size:0.85rem">Marking: 1M first 2 · 1M 4 from rest · 1M answer</em>
+        </div>
+        <div class="sol-final">
+          <div class="sol-final-label">ANSWER</div>
+          <div class="sol-final-value">$70$ ways</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Q10(c) QUESTION -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.10(c)</div>
+        <div class="q-tag">PAST YEAR EXAM</div>
+        <div class="q-clo">CLO 2 · 3 marks</div>
+      </div>
+      <div class="q-body">
+        Select 6 out of 10 questions. How many ways if <span class="highlight">he must answer at least 3 of the first 4 questions</span>?
+      </div>
+    </div>
+
+    <!-- Q10(c) ANSWER -->
+    <div class="slide">
+      <div class="q-header">
+        <div class="q-number">Q.10(c)</div>
+        <div class="q-tag">SOLUTION</div>
+        <div class="q-clo">CLO 2 · 3 marks</div>
+      </div>
+      <div class="solution-card">
+        <div class="sol-step">
+          <span class="label">Case 1: exactly 3 of first 4</span>
+          ${}^4C_3 \times {}^6C_3 = 4 \times 20 = 80$
+        </div>
+        <div class="sol-step">
+          <span class="label">Case 2: exactly 4 of first 4</span>
+          ${}^4C_4 \times {}^6C_2 = 1 \times 15 = 15$
+        </div>
+        <div class="sol-step">
+          <span class="label">Total</span>
+          <span class="sol-math">$80 + 15 = 95$</span>
+          <em style="color:var(--gold-soft);font-size:0.85rem">Marking: 1M each case · 1M answer</em>
+        </div>
+        <div class="sol-final">
+          <div class="sol-final-label">ANSWER</div>
+          <div class="sol-final-value">$95$ ways</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- END SLIDE -->
+    <div class="slide">
+      <div class="title-slide">
+        <div class="title-ornament">✦ ✧ ✦</div>
+        <div class="title-eyebrow">END OF TUTORIAL</div>
+        <h1 class="title-main">Terima Kasih</h1>
+        <div class="title-sub">~ Selamat Belajar! ~</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    <button class="nav-btn" id="prevBtn" onclick="changeSlide(-1)">◂ PREV</button>
+    <div class="slide-dots" id="slideDots"></div>
+    <button class="nav-btn" id="nextBtn" onclick="changeSlide(1)">NEXT ▸</button>
+  </div>
+
+</div>
+
+<div class="kbd-hint">
+  Use <kbd>←</kbd> <kbd>→</kbd> or <kbd>Space</kbd>/<kbd>Enter</kbd> to navigate
+</div>
+
+<script>
+// Password protection
+const correctPassword = "An15120467##";
+
+function checkPassword() {
+  const input = document.getElementById('passwordInput');
+  const error = document.getElementById('passwordError');
+  const overlay = document.getElementById('passwordOverlay');
+  
+  if (input.value === correctPassword) {
+    overlay.classList.add('hidden');
+    error.textContent = '';
+  } else {
+    error.textContent = '✗ Password salah. Cuba lagi.';
+    input.value = '';
+    input.focus();
+  }
+}
+
+// Allow Enter key to submit
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('passwordInput');
+  input.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      checkPassword();
+    }
+  });
+  input.focus();
+});
+
+// Main slide functionality
+const slides = document.querySelectorAll('.slide');
+const total = slides.length;
+let current = 0;
+
+const dotsContainer = document.getElementById('slideDots');
+slides.forEach((_, i) => {
+  const dot = document.createElement('div');
+  dot.className = 'dot' + (i === 0 ? ' active' : '');
+  dot.onclick = () => goToSlide(i);
+  dotsContainer.appendChild(dot);
+});
+const dots = document.querySelectorAll('.dot');
+
+function updateUI() {
+  slides.forEach((s, i) => s.classList.toggle('active', i === current));
+  dots.forEach((d, i) => d.classList.toggle('active', i === current));
+  document.getElementById('progressText').textContent =
+    String(current + 1).padStart(2, '0') + ' / ' + String(total).padStart(2, '0');
+  document.getElementById('progressFill').style.width = ((current + 1) / total * 100) + '%';
+  document.getElementById('prevBtn').disabled = (current === 0);
+  document.getElementById('nextBtn').disabled = (current === total - 1);
+  if (window.MathJax && window.MathJax.typeset) {
+    setTimeout(() => MathJax.typeset(), 50);
+  }
+  document.getElementById('slideArea').scrollTop = 0;
+}
+
+function changeSlide(dir) {
+  const next = current + dir;
+  if (next >= 0 && next < total) {
+    current = next;
+    updateUI();
+  }
+}
+
+function goToSlide(i) {
+  current = i;
+  updateUI();
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter') {
+    e.preventDefault();
+    changeSlide(1);
+  } else if (e.key === 'ArrowLeft') {
+    changeSlide(-1);
+  }
+});
+
+const symbols = ['n!', 'P', 'C', 'Σ', '∏', 'r!', '∞', '∈', '⊆', 'ℕ'];
+const decor = document.getElementById('mathDecor');
+for (let i = 0; i < 18; i++) {
+  const span = document.createElement('span');
+  span.textContent = symbols[i % symbols.length];
+  span.style.left = Math.random() * 100 + '%';
+  span.style.top = Math.random() * 100 + '%';
+  span.style.fontSize = (2 + Math.random() * 4) + 'rem';
+  span.style.animationDelay = (Math.random() * 20) + 's';
+  span.style.animationDuration = (15 + Math.random() * 15) + 's';
+  decor.appendChild(span);
+}
+
+updateUI();
+</script>
+
+</body>
+</html>
